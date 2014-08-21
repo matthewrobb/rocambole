@@ -62,6 +62,10 @@ exports.parse = function parse(source, opts){
           if ('keyword' in token.type) {
             type = 'Keyword';
             value = token.type.keyword;
+          }
+          else if (token.type.binop === 10) {
+            type = 'Punctuator';
+            value = '/';
           } else {
             switch (token.type.type) {
               case 'eof':
@@ -73,6 +77,14 @@ exports.parse = function parse(source, opts){
               case 'name':
                 type = 'Identifier';
                 value = token.value;
+                break;
+              case 'string':
+                type = 'String';
+                value = token.value;
+                break;
+              case 'regexp':
+                type = 'RegExp';
+                value = String(token.value);
                 break;
               default:
                 type = 'Punctuator';
