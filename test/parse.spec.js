@@ -194,7 +194,7 @@ describe('parse', function () {
             it('should return last token inside node', function () {
                 expect( program.endToken.value ).to.equal( ')' );
                 expect( expressionStatement.endToken.value ).to.equal( ')' );
-                expect( fnExpression.endToken.value ).to.equal( '}' );
+                expect( fnExpression.endToken.value ).to.equal( ')' );
                 expect( block.endToken.value ).to.equal( '}' );
                 expect( returnStatement.endToken.value ).to.equal( ';' );
             });
@@ -204,8 +204,8 @@ describe('parse', function () {
                 var exp = ast.body[0].expression;
                 expect( exp.endToken.value ).to.equal( ']' );
                 expect( exp.elements[0].value ).to.equal( 1 );
-                expect( exp.elements[0].startToken.value ).to.equal( '1' );
-                expect( exp.elements[0].endToken.value ).to.equal( '1' );
+                expect( exp.elements[0].startToken.value ).to.equal( 1 );
+                expect( exp.elements[0].endToken.value ).to.equal( 1 );
             });
         });
 
@@ -214,7 +214,8 @@ describe('parse', function () {
             it('should return first token inside node', function () {
                 expect( program.startToken.value ).to.equal( ' block ' );
                 expect( expressionStatement.startToken.value ).to.equal( '(' );
-                expect( fnExpression.startToken.value ).to.equal( 'function' );
+                expect( fnExpression.startToken.value ).to.equal( '(' );
+                expect( fnExpression.startToken.next.value ).to.equal( 'function' );
                 expect( block.startToken.value ).to.equal( '{' );
                 expect( returnStatement.startToken.value ).to.equal( 'return' );
             });
@@ -324,6 +325,8 @@ describe('parse', function () {
             var ast = rocambole.parse('');
             expect(ast).to.eql({
                 type: 'Program',
+                start: 0,
+                end: 0,
                 body: [],
                 range: [0,0],
                 comments: [],

@@ -2,7 +2,7 @@
 "use strict";
 
 
-var esprima = require('esprima');
+var acorn = require('acorn');
 
 
 
@@ -43,12 +43,52 @@ exports.parse = function parse(source, opts){
     _addLocInfo = opts && opts.loc;
     source = source.toString();
 
-    var ast = esprima.parse(source, {
-        loc : _addLocInfo,
-        range : true,
-        tokens : true,
-        comment : true
+    var comments = [], tokens = [];
+    var ast = acorn.parse(source, {
+        locations : Boolean(_addLocInfo),
+        ecmaVersion: 6,
+        ranges : true,
+        onComment: function (block, text, start, end) {
+            comments.push({
+                type: block ? 'Block' : 'Line',
+                value: text,
+                range: [start, end]
+            });
+        },
+        // collect token ranges
+        onToken: function (token) {
+          var type, value;
+
+          if ('keyword' in token.type) {
+            type = 'Keyword';
+            value = token.type.keyword;
+          } else {
+            switch (token.type.type) {
+              case 'eof':
+                return;
+              case 'num':
+                type = 'Numeric';
+                value = token.value;
+                break;
+              case 'name':
+                type = 'Identifier';
+                value = token.value;
+                break;
+              default:
+                type = 'Punctuator';
+                value = token.type.type;
+            }
+          }
+
+          tokens.push({
+            type: type,
+            value: value,
+            range: [token.start, token.end]
+          });
+        }
     });
+    ast.tokens = tokens;
+    ast.comments = comments;
 
     // we augment just root node since program is "empty"
     // can't check `ast.body.length` because it might contain just comments
